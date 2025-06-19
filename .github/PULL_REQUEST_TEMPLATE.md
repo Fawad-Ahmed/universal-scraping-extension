@@ -9,22 +9,15 @@ Brief description of changes made.
 - [ ] Performance improvement
 - [ ] Code refactoring
 
-## How Has This Been Tested?
-Please describe the tests that you ran to verify your changes:
-- [ ] Manual testing on Chrome
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Tested on multiple websites
-- [ ] Cross-browser testing (if applicable)
-
-**Test Configuration:**
-- Chrome Version: 
-- Extension Version: 
-- Operating System: 
-- Test Websites: 
+## Testing
+- [ ] I have tested these changes locally
+- [ ] I have added appropriate unit tests
+- [ ] All existing tests pass
+- [ ] I have tested on multiple websites (if applicable)
+- [ ] I have tested the extension in Chrome
 
 ## Screenshots (if applicable)
-Add screenshots to help explain your changes, especially for UI modifications.
+Add screenshots to help explain your changes.
 
 ## Checklist
 - [ ] My code follows the project's style guidelines
@@ -32,14 +25,11 @@ Add screenshots to help explain your changes, especially for UI modifications.
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [ ] I have updated the version number (if needed)
 - [ ] Any dependent changes have been merged and published
 
 ## Related Issues
-Fixes #(issue number)
-Closes #(issue number)
-Related to #(issue number)
+Closes #(issue_number)
 
 ## Additional Notes
-Any additional information that reviewers should know about this PR.
+Add any other notes about the PR here.
