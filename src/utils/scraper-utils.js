@@ -83,7 +83,11 @@ window.ScraperUtils = {
         });
         
         // Get data rows
-        const dataRows = table.querySelector('thead') ? rows.slice(0) : rows.slice(1);
+        // Prefer rows inside <tbody> if available, otherwise skip the header row
+        let dataRows = Array.from(table.querySelectorAll('tbody tr'));
+        if (dataRows.length === 0) {
+            dataRows = rows.slice(1);
+        }
         
         return dataRows.map(row => {
             const cells = row.querySelectorAll('td, th');
