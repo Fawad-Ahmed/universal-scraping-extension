@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Scraper - Standalone Mode</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .window-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .window-control-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .window-control-btn:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+        
+        .minimize-btn:hover { background: #fff3cd; }
+        .close-btn:hover { background: #f8d7da; }
+        
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header .subtitle {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            margin: 0 0 20px 0;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+        
+        .data-counter {
+            background: linear-gradient(135deg, #e7f3ff 0%, #cce7ff 100%);
+            border: 1px solid #007bff;
+            color: #0056b3;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .section {
+            margin-bottom: 24px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .grid.two-col {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            min-height: 44px;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #0056b3; }
+        
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover:not(:disabled) { background: #545b62; }
+        
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover:not(:disabled) { background: #218838; }
+        
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover:not(:disabled) { background: #e0a800; }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #007bff !important;
+            color: #007bff;
+        }
+        .btn-outline:hover:not(:disabled) {
+            background: #007bff;
+            color: white;
+        }
+        
+        .progress-section {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+            border-radius: 6px;
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
+        .preview-section {
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .preview-table th,
+        .preview-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .preview-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .preview-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .preview-info {
+            padding: 12px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Scrollbar styling */
+        .content::-webkit-scrollbar,
+        .preview-section::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content::-webkit-scrollbar-track,
+        .preview-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .content::-webkit-scrollbar-thumb,
+        .preview-section::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .content::-webkit-scrollbar-thumb:hover,
+        .preview-section::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 500px) {
+            .grid.two-col {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 16px;
+            }
+            
+            .content {
+                padding: 12px;
+            }
+            
+            .section {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="window-controls">
+        <button id="minimizeBtn" class="window-control-btn minimize-btn" title="Minimize">−</button>
+        <button id="closeBtn" class="window-control-btn close-btn" title="Close">✕</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Universal Scraper</h1>
+            <div class="subtitle">Standalone Mode - v2.0.0</div>
+        </div>
+        
+        <div class="content">
+            <!-- Status Messages -->
+            <div id="status" class="status hidden"></div>
+            
+            <!-- Data Counter -->
+            <div id="dataCounter" class="data-counter hidden">
+                <div id="countText">No data scraped yet</div>
+            </div>
+            
+            <!-- Visual Selector Section -->
+            <div class="section">
+                <h3>🎯 Visual Selector</h3>
+                <div class="grid">
+                    <button id="toggleSelector" class="btn btn-primary">
+                        <span>👆</span> Start Visual Selection
+                    </button>
+                    <button id="selectSimilar" class="btn btn-secondary" disabled>
+                        <span>🔄</span> Select Similar Elements
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Scraping Configuration -->
+            <div class="section">
+                <h3>⚙️ Scraping Settings</h3>
+                <div class="grid two-col">
+                    <div class="form-group">
+                        <label for="delay">Page Delay (ms)</label>
+                        <input type="number" id="delay" value="2000" min="1000" max="10000" step="500">
+                    </div>
+                    <div class="form-group">
+                        <label for="format">Export Format</label>
+                        <select id="format">
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scraping Actions -->
+            <div class="section">
+                <h3>🚀 Scraping Actions</h3>
+                <div class="grid">
+                    <button id="scrapeCurrentPage" class="btn btn-secondary">
+                        <span>📄</span> Scrape Current Page Only
+                    </button>
+                    <button id="scrapeAllPages" class="btn btn-primary">
+                        <span>🚀</span> Scrape All Pages
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Progress Section -->
+            <div id="progressContainer" class="progress-section hidden">
+                <h3>📊 Scraping Progress</h3>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="progressText" class="progress-text">Initializing...</div>
+                <button id="stopScraping" class="btn btn-warning" style="margin-top: 12px;">
+                    <span>⏹️</span> Stop Scraping
+                </button>
+            </div>
+            
+            <!-- Data Management -->
+            <div id="dataActions" class="section hidden">
+                <h3>💾 Data Management</h3>
+                <div class="grid">
+                    <button id="previewData" class="btn btn-outline">
+                        <span>👀</span> Preview Data
+                    </button>
+                    <button id="downloadData" class="btn btn-success">
+                        <span>📥</span> Download Data
+                    </button>
+                    <button id="copyToSheets" class="btn btn-success">
+                        <span>📋</span> Copy for Google Sheets
+                    </button>
+                    <button id="clearData" class="btn btn-warning">
+                        <span>🗑️</span> Clear All Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Data Preview -->
+            <div id="previewContainer" class="section hidden">
+                <h3>📋 Data Preview</h3>
+                <div class="preview-section">
+                    <div id="previewTable"></div>
+                    <div id="previewInfo" class="preview-info"></div>
+                </div>
+            </div>
+            
+            <!-- Recipe System -->
+            <div class="section">
+                <h3>📚 Recipe System</h3>
+                <div class="grid">
+                    <button id="saveRecipe" class="btn btn-outline" disabled>
+                        <span>💾</span> Save Recipe
+                    </button>
+                    <button id="loadRecipe" class="btn btn-outline">
+                        <span>📂</span> Load Recipe
+                    </button>
+                </div>
+                <p style="font-size: 12px; color: #666; margin: 12px 0 0 0; text-align: center;">
+                    Advanced recipe features coming soon
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <a href="https://github.com/Fawad-Ahmed/universal-scraping-extension" target="_blank">📖 Documentation</a>
+            <a href="https://github.com/Fawad-Ahmed/universal-scraping-extension/issues" target="_blank">🐛 Report Issues</a>
+            <a href="https://github.com/Fawad-Ahmed/universal-scraping-extension/discussions" target="_blank">💬 Community</a>
+        </div>
+    </div>
+    
+    <script src="standalone.js"></script>
+</body>
+</html>
