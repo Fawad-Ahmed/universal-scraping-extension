@@ -1,0 +1,334 @@
+/* Universal Scraper Content Script Styles */
+/* These styles are injected into web pages to provide visual feedback for the scraping interface */
+
+/* Element highlighting for visual selector */
+.scraper-highlight {
+    outline: 3px solid #007bff !important;
+    outline-offset: 2px !important;
+    background-color: rgba(0, 123, 255, 0.1) !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 999998 !important;
+}
+
+.scraper-highlight::before {
+    content: "👆 Click to select";
+    position: absolute !important;
+    top: -30px !important;
+    left: 0 !important;
+    background: #007bff !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    z-index: 999999 !important;
+    opacity: 0 !important;
+    transform: translateY(5px) !important;
+    transition: opacity 0.2s, transform 0.2s !important;
+}
+
+.scraper-highlight:hover::before {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Selected elements styling */
+.scraper-selected {
+    outline: 3px solid #28a745 !important;
+    outline-offset: 2px !important;
+    background-color: rgba(40, 167, 69, 0.2) !important;
+    position: relative !important;
+    z-index: 999998 !important;
+}
+
+.scraper-selected::after {
+    content: "✅ Selected";
+    position: absolute !important;
+    top: -30px !important;
+    left: 0 !important;
+    background: #28a745 !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    z-index: 999999 !important;
+}
+
+/* Disable text selection during visual selector mode */
+.scraper-no-select,
+.scraper-no-select * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Loading overlay for multi-page scraping */
+.scraper-loading-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 999997 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.scraper-loading-content {
+    background: white !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    text-align: center !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.scraper-loading-spinner {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 3px solid #f3f3f3 !important;
+    border-top: 3px solid #007bff !important;
+    border-radius: 50% !important;
+    animation: scraper-spin 1s linear infinite !important;
+    margin-right: 10px !important;
+}
+
+@keyframes scraper-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Progress indicator for multi-page scraping */
+.scraper-progress {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: white !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    z-index: 999999 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    max-width: 300px !important;
+}
+
+.scraper-progress-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
+}
+
+.scraper-progress-title {
+    font-weight: 600 !important;
+    color: #333 !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+}
+
+.scraper-progress-close {
+    background: none !important;
+    border: none !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    color: #666 !important;
+    padding: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.scraper-progress-bar {
+    width: 100% !important;
+    height: 8px !important;
+    background: #e9ecef !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    margin-bottom: 8px !important;
+}
+
+.scraper-progress-fill {
+    height: 100% !important;
+    background: linear-gradient(90deg, #007bff, #0056b3) !important;
+    transition: width 0.3s ease !important;
+    border-radius: 4px !important;
+}
+
+.scraper-progress-text {
+    font-size: 12px !important;
+    color: #666 !important;
+    margin: 0 !important;
+}
+
+/* Error indicators */
+.scraper-error {
+    outline: 3px solid #dc3545 !important;
+    outline-offset: 2px !important;
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.scraper-error::after {
+    content: "❌ Error";
+    position: absolute !important;
+    top: -30px !important;
+    left: 0 !important;
+    background: #dc3545 !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    z-index: 999999 !important;
+}
+
+/* Notification system */
+.scraper-notification {
+    position: fixed !important;
+    top: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: white !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    z-index: 999999 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 14px !important;
+    max-width: 400px !important;
+    opacity: 0 !important;
+    transform: translateX(-50%) translateY(-10px) !important;
+    transition: opacity 0.3s, transform 0.3s !important;
+}
+
+.scraper-notification.show {
+    opacity: 1 !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+.scraper-notification.success {
+    border-left: 4px solid #28a745 !important;
+    background: #d4edda !important;
+    color: #155724 !important;
+}
+
+.scraper-notification.error {
+    border-left: 4px solid #dc3545 !important;
+    background: #f8d7da !important;
+    color: #721c24 !important;
+}
+
+.scraper-notification.info {
+    border-left: 4px solid #007bff !important;
+    background: #d1ecf1 !important;
+    color: #0c5460 !important;
+}
+
+/* Table highlighting for automatic detection */
+.scraper-table-detected {
+    outline: 2px dashed #28a745 !important;
+    outline-offset: 4px !important;
+    background-color: rgba(40, 167, 69, 0.05) !important;
+}
+
+.scraper-table-detected::before {
+    content: "📊 Table detected";
+    position: absolute !important;
+    top: -35px !important;
+    left: 0 !important;
+    background: #28a745 !important;
+    color: white !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    z-index: 999999 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .scraper-progress {
+        right: 10px !important;
+        left: 10px !important;
+        max-width: none !important;
+    }
+    
+    .scraper-notification {
+        left: 10px !important;
+        right: 10px !important;
+        transform: none !important;
+        max-width: none !important;
+    }
+    
+    .scraper-notification.show {
+        transform: none !important;
+    }
+}
+
+/* Prevent conflicts with page styles */
+.scraper-highlight,
+.scraper-selected,
+.scraper-error,
+.scraper-table-detected {
+    box-sizing: border-box !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .scraper-progress {
+        background: #333 !important;
+        border-color: #555 !important;
+        color: #fff !important;
+    }
+    
+    .scraper-progress-title {
+        color: #fff !important;
+    }
+    
+    .scraper-progress-close {
+        color: #ccc !important;
+    }
+    
+    .scraper-notification {
+        background: #333 !important;
+        border-color: #555 !important;
+        color: #fff !important;
+    }
+    
+    .scraper-loading-content {
+        background: #333 !important;
+        color: #fff !important;
+    }
+}
+
+/* Animation for smooth interactions */
+.scraper-highlight,
+.scraper-selected,
+.scraper-error {
+    transition: all 0.2s ease !important;
+}
+
+/* Ensure tooltips don't interfere with page layout */
+.scraper-highlight::before,
+.scraper-selected::after,
+.scraper-error::after,
+.scraper-table-detected::before {
+    pointer-events: none !important;
+}
