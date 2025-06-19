@@ -1,14 +1,14 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 Discord Community
-    url: https://discord.gg/universalscraping
-    about: Join our Discord community for questions and discussions
+  - name: 💬 Discussion Forum
+    url: https://github.com/Fawad-Ahmed/universal-scraping-extension/discussions
+    about: Ask questions and discuss ideas with the community
   - name: 📖 Documentation
-    url: https://docs.universalscraping.com
-    about: Check our comprehensive documentation
-  - name: 💌 Email Support
-    url: mailto:support@universalscraping.com
-    about: Contact our support team directly
-  - name: 🤝 Contributing Guide
-    url: https://github.com/Fawad-Ahmed/universal-scraping-extension/blob/main/CONTRIBUTING.md
-    about: Learn how to contribute to this project
+    url: https://github.com/Fawad-Ahmed/universal-scraping-extension/blob/main/docs/USER_GUIDE.md
+    about: Check our comprehensive user guide and documentation
+  - name: 💌 Email Support  
+    url: mailto:fawad.ahmed@universalscraping.com
+    about: Contact the maintainer directly for private issues
+  - name: 🌟 Chrome Web Store
+    url: https://chrome.google.com/webstore
+    about: Download the extension and leave reviews
