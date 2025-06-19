@@ -1,0 +1,96 @@
+{
+  "manifest_version": 3,
+  "name": "Universal Web Scraper",
+  "version": "2.0.0",
+  "description": "The most powerful, intuitive, and versatile web scraping Chrome extension. Transform any website into structured data with point-and-click simplicity.",
+  "author": "Fawad Ahmed",
+  "homepage_url": "https://github.com/Fawad-Ahmed/universal-scraping-extension",
+  
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "storage",
+    "clipboardWrite",
+    "windows",
+    "tabs",
+    "contextMenus"
+  ],
+  
+  "host_permissions": [
+    "*://*/*"
+  ],
+  
+  "icons": {
+    "16": "public/icons/icon16.png",
+    "32": "public/icons/icon32.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+  
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Universal Web Scraper",
+    "default_icon": {
+      "16": "public/icons/icon16.png",
+      "32": "public/icons/icon32.png",
+      "48": "public/icons/icon48.png",
+      "128": "public/icons/icon128.png"
+    }
+  },
+  
+  "background": {
+    "service_worker": "src/background/background.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": [
+        "src/utils/dom-utils.js",
+        "src/utils/scraper-utils.js",
+        "src/content/content.js"
+      ],
+      "css": ["src/content/content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/standalone/standalone.html",
+        "src/standalone/standalone.js",
+        "public/icons/*",
+        "src/utils/*"
+      ],
+      "matches": ["*://*/*"]
+    }
+  ],
+  
+  "commands": {
+    "toggle-scraper": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Toggle scraper overlay"
+    },
+    "quick-scrape": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Q",
+        "mac": "Command+Shift+Q"
+      },
+      "description": "Quick scrape current page"
+    }
+  },
+  
+  "options_page": "src/options/options.html",
+  
+  "minimum_chrome_version": "88",
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
