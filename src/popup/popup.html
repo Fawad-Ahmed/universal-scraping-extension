@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 350px;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+        }
+        .header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .header .subtitle {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #abd8ff;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-1px);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800, #d39e00);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #007bff;
+            color: #007bff;
+        }
+        .btn-outline:hover {
+            background: #007bff;
+            color: white;
+        }
+        .settings-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .settings-panel h3 {
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            color: #495057;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #495057;
+        }
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .preview-container {
+            margin-top: 15px;
+        }
+        .preview-table {
+            font-size: 11px;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .preview-table th,
+        .preview-table td {
+            border: 1px solid #dee2e6;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        .preview-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .progress-container {
+            margin: 15px 0;
+        }
+        .progress {
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            height: 24px;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .progress-text {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .data-stats {
+            background: #e7f3ff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        .data-stats .count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .icon {
+            font-size: 16px;
+        }
+        .version {
+            text-align: center;
+            font-size: 10px;
+            color: #adb5bd;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🌐 Universal Scraper</h2>
+            <div class="subtitle">Extract data from any website</div>
+        </div>
+        
+        <div id="status" class="status hidden"></div>
+        
+        <div id="dataStats" class="data-stats hidden">
+            <div class="count" id="dataCount">0</div>
+            <div>items scraped</div>
+        </div>
+        
+        <div class="button-group">
+            <button id="showScraper" class="btn-primary">
+                <span class="icon">🎯</span> Show Scraper on Page
+            </button>
+            
+            <button id="popOut" class="btn-warning">
+                <span class="icon">📌</span> Open Standalone Window
+            </button>
+        </div>
+        
+        <div class="quick-actions">
+            <button id="scrapeCurrentPage" class="btn-secondary">
+                <span class="icon">📄</span> Quick Scrape
+            </button>
+            
+            <button id="openRecipes" class="btn-outline">
+                <span class="icon">📚</span> Recipes
+            </button>
+        </div>
+        
+        <div class="settings-panel">
+            <h3>⚙️ Settings</h3>
+            
+            <div class="form-group">
+                <label for="exportFormat">Export Format</label>
+                <select id="exportFormat">
+                    <option value="csv">CSV</option>
+                    <option value="excel">Excel (XLSX)</option>
+                    <option value="json">JSON</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="scrapingDelay">Delay between pages (ms)</label>
+                <input type="number" id="scrapingDelay" value="2000" min="500" max="10000" step="500">
+            </div>
+            
+            <div class="form-group">
+                <label for="maxPages">Max pages to scrape</label>
+                <input type="number" id="maxPages" value="10" min="1" max="1000">
+            </div>
+        </div>
+        
+        <div id="progressContainer" class="progress-container hidden">
+            <div class="progress">
+                <div id="progressBar" class="progress-bar">0%</div>
+            </div>
+            <div id="progressText" class="progress-text">Initializing...</div>
+        </div>
+        
+        <div id="actionButtons" class="button-group hidden">
+            <button id="previewData" class="btn-secondary">
+                <span class="icon">👀</span> Preview Data
+            </button>
+            
+            <button id="downloadData" class="btn-success">
+                <span class="icon">📥</span> Download Data
+            </button>
+            
+            <button id="copyToClipboard" class="btn-success">
+                <span class="icon">📋</span> Copy to Clipboard
+            </button>
+            
+            <button id="clearData" class="btn-warning">
+                <span class="icon">🗑️</span> Clear Data
+            </button>
+        </div>
+        
+        <div id="previewContainer" class="preview-container hidden">
+            <h3>Data Preview</h3>
+            <div id="previewTable" style="max-height: 200px; overflow: auto;"></div>
+            <div id="previewInfo" style="font-size: 12px; color: #6c757d; margin-top: 8px;"></div>
+        </div>
+        
+        <div class="version">
+            Universal Scraper v2.0.0
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
