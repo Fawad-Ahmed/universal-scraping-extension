@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+    <title>Universal Scraper</title>
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-header">
+            <h2>🌐 Universal Scraper</h2>
+            <div class="version">v2.0.0</div>
+        </div>
+        
+        <div class="popup-content">
+            <!-- Status Messages -->
+            <div id="status" class="status hidden"></div>
+            
+            <!-- Data Counter -->
+            <div id="dataCounter" class="data-counter hidden">
+                <span id="countText">No data scraped yet</span>
+            </div>
+            
+            <!-- Visual Selector Section -->
+            <div class="section">
+                <h3>🎯 Visual Selector</h3>
+                <div class="button-grid">
+                    <button id="toggleSelector" class="btn btn-primary">
+                        <span>👆</span> Start Visual Selection
+                    </button>
+                    <button id="selectSimilar" class="btn btn-secondary" disabled>
+                        <span>🔄</span> Select Similar Elements
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Scraping Section -->
+            <div class="section">
+                <h3>🚀 Scraping Actions</h3>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="delay">Page Delay (ms)</label>
+                        <input type="number" id="delay" value="2000" min="1000" max="10000" step="500">
+                    </div>
+                    <div class="form-group">
+                        <label for="format">Export Format</label>
+                        <select id="format">
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="button-grid">
+                    <button id="scrapeCurrentPage" class="btn btn-secondary">
+                        <span>📄</span> Scrape Current Page
+                    </button>
+                    <button id="scrapeAllPages" class="btn btn-primary">
+                        <span>🚀</span> Scrape All Pages
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Progress Section -->
+            <div id="progressContainer" class="section hidden">
+                <h3>📊 Progress</h3>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText" class="progress-text">Initializing...</div>
+                </div>
+                <button id="stopScraping" class="btn btn-warning">
+                    <span>⏹️</span> Stop Scraping
+                </button>
+            </div>
+            
+            <!-- Data Actions Section -->
+            <div id="dataActions" class="section hidden">
+                <h3>💾 Data Export</h3>
+                <div class="button-grid">
+                    <button id="previewData" class="btn btn-outline">
+                        <span>👀</span> Preview Data
+                    </button>
+                    <button id="downloadData" class="btn btn-success">
+                        <span>📥</span> Download Data
+                    </button>
+                    <button id="copyToSheets" class="btn btn-success">
+                        <span>📋</span> Copy for Google Sheets
+                    </button>
+                    <button id="clearData" class="btn btn-warning">
+                        <span>🗑️</span> Clear Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Preview Section -->
+            <div id="previewContainer" class="section hidden">
+                <h3>📋 Data Preview</h3>
+                <div id="previewTable" class="preview-table"></div>
+                <div id="previewInfo" class="preview-info"></div>
+            </div>
+            
+            <!-- Advanced Options -->
+            <div class="section">
+                <h3>⚙️ Advanced</h3>
+                <div class="button-grid">
+                    <button id="popOut" class="btn btn-outline">
+                        <span>📌</span> Pop Out Window
+                    </button>
+                    <button id="saveRecipe" class="btn btn-outline" disabled>
+                        <span>💾</span> Save Recipe
+                    </button>
+                    <button id="loadRecipe" class="btn btn-outline">
+                        <span>📂</span> Load Recipe
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Footer Links -->
+            <div class="footer">
+                <a href="https://github.com/Fawad-Ahmed/universal-scraping-extension" target="_blank">
+                    📖 Documentation
+                </a>
+                <a href="https://github.com/Fawad-Ahmed/universal-scraping-extension/issues" target="_blank">
+                    🐛 Report Issues
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
