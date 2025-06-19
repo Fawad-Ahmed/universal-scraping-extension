@@ -16,29 +16,38 @@ A clear and concise description of what you want to happen.
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
 
-**Use case and target audience**
-Describe who would benefit from this feature and how they would use it:
-- [ ] Casual users (non-technical)
-- [ ] Market researchers
-- [ ] Developers
-- [ ] Data analysts
-- [ ] Small business owners
-- [ ] Other: ___________
+**Use Case**
+Describe the specific use case or scenario where this feature would be helpful:
+- What type of data are you trying to scrape?
+- What website(s) would this help with?
+- How would this improve your workflow?
 
-**Priority and impact**
+**Feature Category**
+Please select the category that best fits your request:
+- [ ] Visual Selector improvements
+- [ ] Data extraction enhancements
+- [ ] Export/integration features
+- [ ] Recipe system improvements
+- [ ] Performance optimizations
+- [ ] UI/UX improvements
+- [ ] Cloud/scheduling features
+- [ ] Developer API features
+- [ ] Other
+
+**Priority**
 How important is this feature to you?
 - [ ] Nice to have
+- [ ] Would be helpful
 - [ ] Important for my workflow
-- [ ] Critical/blocking feature
+- [ ] Blocking my use of the extension
 
-**Technical considerations**
-If applicable, describe any technical details:
-- Does this require changes to the visual selector?
-- Should this be a free or premium feature?
-- Are there any websites this specifically targets?
-
-**Mockups or examples**
-If applicable, add screenshots, mockups, or links to similar features in other tools.
+**Mockups/Examples**
+If applicable, add screenshots, mockups, or examples to help explain your feature request.
 
 **Additional context**
-Add any other context, screenshots, or examples about the feature request here.
+Add any other context, links, or examples about the feature request here.
+
+**Checklist:**
+- [ ] I have searched existing issues to make sure this isn't a duplicate
+- [ ] I have considered if this feature aligns with the extension's purpose
+- [ ] I would be willing to help test this feature when implemented
