@@ -31,13 +31,18 @@ If applicable, add screenshots to help explain your problem.
 **Website Information:**
  - URL: [e.g. https://example.com]
  - Website Type: [e.g. e-commerce, social media, etc.]
- - Does the site use JavaScript frameworks: [e.g. React, Vue, Angular]
+ - Does the site use JavaScript heavily? [Yes/No]
 
-**Console Errors:**
-Please open Developer Tools (F12) and paste any console errors here:
+**Extension Logs:**
+Please open Chrome DevTools (F12), go to Console tab, and paste any error messages here:
 ```
 Paste console errors here
 ```
 
 **Additional context**
 Add any other context about the problem here.
+
+**Checklist:**
+- [ ] I have searched existing issues to make sure this isn't a duplicate
+- [ ] I have tried refreshing the page and restarting the browser
+- [ ] I have the latest version of the extension installed
