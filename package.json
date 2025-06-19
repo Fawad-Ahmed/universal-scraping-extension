@@ -1,0 +1,51 @@
+{
+  "name": "universal-scraping-extension",
+  "version": "2.0.0",
+  "description": "The most powerful, intuitive, and versatile web scraping Chrome extension",
+  "main": "src/background/index.js",
+  "scripts": {
+    "dev": "webpack --mode=development --watch",
+    "build": "webpack --mode=production",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write .",
+    "package": "node scripts/package.js",
+    "release": "node scripts/deploy.js"
+  },
+  "keywords": [
+    "web-scraping",
+    "chrome-extension",
+    "data-extraction",
+    "automation",
+    "no-code"
+  ],
+  "author": "Fawad",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "babel-loader": "^9.1.0",
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.0",
+    "jest": "^29.7.0",
+    "playwright": "^1.44.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.0",
+    "copy-webpack-plugin": "^12.0.0",
+    "css-loader": "^7.1.0",
+    "style-loader": "^4.0.0",
+    "archiver": "^7.0.0"
+  },
+  "dependencies": {
+    "papaparse": "^5.4.1",
+    "lodash": "^4.17.21"
+  }
+}
