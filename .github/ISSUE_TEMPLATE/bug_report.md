@@ -31,16 +31,13 @@ If applicable, add screenshots to help explain your problem.
 **Website Information:**
  - URL: [e.g. https://example.com]
  - Website Type: [e.g. e-commerce, social media, etc.]
- - Does the site use JavaScript heavily? [Yes/No]
+ - Does the site use JavaScript frameworks: [e.g. React, Vue, Angular]
 
 **Console Errors:**
-If you see any errors in the browser console (F12), please paste them here:
+Please open Developer Tools (F12) and paste any console errors here:
 ```
 Paste console errors here
 ```
 
 **Additional context**
-Add any other context about the problem here. Include:
-- Does this happen on all websites or just specific ones?
-- Were you using visual selector or table detection?
-- How many pages were you trying to scrape?
+Add any other context about the problem here.
