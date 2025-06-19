@@ -1,575 +1,444 @@
-// Enhanced popup script for Universal Scraping Extension
-// Built on the foundation of your existing popup.js with advanced features
-console.log('🚀 Universal Scraping Popup Loading...');
+// popup.js - Universal Web Scraper Popup Script
+console.log('🚀 Universal Scraper Popup Loading...');
 
-class UniversalScrapingPopup {
+class UniversalScraperPopup {
     constructor() {
         this.scrapedData = [];
         this.currentTab = null;
-        this.isScrapingActive = false;
-        this.selectedElements = 0;
-        this.selectorActive = false;
-        
         this.init();
     }
 
     async init() {
-        await this.getCurrentTab();
+        await this.loadCurrentTab();
+        await this.loadSettings();
+        await this.loadStoredData();
         this.setupEventListeners();
-        this.loadStoredData();
-        this.loadSettings();
+        this.updateUI();
         console.log('✅ Popup initialized');
     }
 
-    async getCurrentTab() {
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        this.currentTab = tabs[0];
+    async loadCurrentTab() {
+        try {
+            const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+            this.currentTab = tabs[0];
+        } catch (error) {
+            console.error('❌ Error loading current tab:', error);
+        }
+    }
+
+    async loadSettings() {
+        try {
+            const settings = await chrome.storage.sync.get([
+                'exportFormat',
+                'scrapingDelay', 
+                'maxPages'
+            ]);
+
+            document.getElementById('exportFormat').value = settings.exportFormat || 'csv';
+            document.getElementById('scrapingDelay').value = settings.scrapingDelay || 2000;
+            document.getElementById('maxPages').value = settings.maxPages || 10;
+        } catch (error) {
+            console.error('❌ Error loading settings:', error);
+        }
+    }
+
+    async loadStoredData() {
+        try {
+            const stored = await chrome.storage.local.get(['scrapedData']);
+            if (stored.scrapedData && stored.scrapedData.length > 0) {
+                this.scrapedData = stored.scrapedData;
+                this.updateDataStats();
+                this.showActionButtons();
+            }
+        } catch (error) {
+            console.error('❌ Error loading stored data:', error);
+        }
     }
 
     setupEventListeners() {
-        // Visual selector controls
-        document.getElementById('toggleSelector')?.addEventListener('click', () => {
-            this.toggleVisualSelector();
+        // Main action buttons
+        document.getElementById('showScraper').addEventListener('click', () => {
+            this.showScraperOnPage();
         });
 
-        document.getElementById('selectSimilar')?.addEventListener('click', () => {
-            this.selectSimilarElements();
+        document.getElementById('popOut').addEventListener('click', () => {
+            this.openStandaloneWindow();
         });
 
-        // Scraping actions
-        document.getElementById('scrapeCurrentPage')?.addEventListener('click', () => {
-            this.scrapeCurrentPage();
+        document.getElementById('scrapeCurrentPage').addEventListener('click', () => {
+            this.quickScrape();
         });
 
-        document.getElementById('scrapeAllPages')?.addEventListener('click', () => {
-            this.scrapeAllPages();
+        document.getElementById('openRecipes').addEventListener('click', () => {
+            this.openRecipeManager();
         });
 
-        document.getElementById('stopScraping')?.addEventListener('click', () => {
-            this.stopScraping();
-        });
-
-        // Data actions
-        document.getElementById('downloadData')?.addEventListener('click', () => {
-            this.downloadData();
-        });
-
-        document.getElementById('previewData')?.addEventListener('click', () => {
+        // Data action buttons
+        document.getElementById('previewData').addEventListener('click', () => {
             this.showPreview();
         });
 
-        document.getElementById('copyToSheets')?.addEventListener('click', () => {
-            this.copyToGoogleSheets();
+        document.getElementById('downloadData').addEventListener('click', () => {
+            this.downloadData();
         });
 
-        document.getElementById('clearData')?.addEventListener('click', () => {
+        document.getElementById('copyToClipboard').addEventListener('click', () => {
+            this.copyToClipboard();
+        });
+
+        document.getElementById('clearData').addEventListener('click', () => {
             this.clearData();
         });
 
-        // Advanced features
-        document.getElementById('popOut')?.addEventListener('click', () => {
-            this.popOutWindow();
-        });
-
-        document.getElementById('saveRecipe')?.addEventListener('click', () => {
-            this.saveRecipe();
-        });
-
-        document.getElementById('loadRecipe')?.addEventListener('click', () => {
-            this.loadRecipe();
-        });
-
         // Settings
-        document.getElementById('delay')?.addEventListener('change', () => {
-            this.saveSettings();
-        });
-
-        document.getElementById('format')?.addEventListener('change', () => {
-            this.saveSettings();
+        ['exportFormat', 'scrapingDelay', 'maxPages'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                this.saveSettings();
+            });
         });
 
         // Listen for messages from content script
-        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-            this.handleMessage(message, sender, sendResponse);
+        chrome.runtime.onMessage.addListener((message) => {
+            this.handleMessage(message);
         });
     }
 
-    async toggleVisualSelector() {
-        try {
-            const response = await chrome.tabs.sendMessage(this.currentTab.id, {
-                action: 'toggleSelector'
-            });
-
-            if (response?.success) {
-                this.selectorActive = response.active;
-                this.updateSelectorButton();
-                this.showStatus(
-                    response.active ? '👆 Visual selector activated - click elements to select' : '👆 Visual selector deactivated',
-                    'info'
-                );
-            }
-        } catch (error) {
-            this.showStatus('Error toggling selector: ' + error.message, 'error');
-        }
-    }
-
-    updateSelectorButton() {
-        const button = document.getElementById('toggleSelector');
-        const selectSimilar = document.getElementById('selectSimilar');
+    updateUI() {
+        this.updateDataStats();
         
-        if (this.selectorActive) {
-            button.innerHTML = '<span>🛑</span> Stop Selection';
-            button.classList.add('btn-warning');
-            button.classList.remove('btn-primary');
-            selectSimilar.disabled = false;
+        // Show different UI based on data availability
+        if (this.scrapedData.length > 0) {
+            this.showActionButtons();
         } else {
-            button.innerHTML = '<span>👆</span> Start Visual Selection';
-            button.classList.add('btn-primary');
-            button.classList.remove('btn-warning');
-            selectSimilar.disabled = this.selectedElements === 0;
+            this.hideActionButtons();
         }
     }
 
-    async selectSimilarElements() {
-        try {
-            const response = await chrome.tabs.sendMessage(this.currentTab.id, {
-                action: 'selectSimilar'
-            });
-
-            if (response?.success) {
-                this.showStatus(`Selected ${response.count} similar elements`, 'success');
-                this.selectedElements = response.count;
-                this.updateElementCounter();
-            }
-        } catch (error) {
-            this.showStatus('Error selecting similar elements: ' + error.message, 'error');
+    updateDataStats() {
+        const countEl = document.getElementById('dataCount');
+        const statsEl = document.getElementById('dataStats');
+        
+        if (this.scrapedData.length > 0) {
+            countEl.textContent = this.scrapedData.length;
+            statsEl.classList.remove('hidden');
+        } else {
+            statsEl.classList.add('hidden');
         }
     }
 
-    async scrapeCurrentPage() {
-        try {
-            this.showStatus('🔄 Scraping current page...', 'info');
-            this.disableButtons(true);
-            
-            const response = await chrome.tabs.sendMessage(this.currentTab.id, {
-                action: 'scrapeCurrentPage'
-            });
-
-            if (response?.success) {
-                this.scrapedData = response.data;
-                this.showStatus(`✅ Successfully scraped ${response.data.length} items`, 'success');
-                this.showDataActions();
-                this.updateDataCounter();
-                await this.saveData();
-            } else {
-                this.showStatus('❌ Error: ' + (response?.error || 'Unknown error'), 'error');
-            }
-        } catch (error) {
-            this.showStatus('❌ Connection error. Please refresh and try again.', 'error');
-        } finally {
-            this.disableButtons(false);
-        }
+    showActionButtons() {
+        document.getElementById('actionButtons').classList.remove('hidden');
     }
 
-    async scrapeAllPages() {
+    hideActionButtons() {
+        document.getElementById('actionButtons').classList.add('hidden');
+    }
+
+    showStatus(message, type = 'info') {
+        const statusEl = document.getElementById('status');
+        statusEl.textContent = message;
+        statusEl.className = `status ${type}`;
+        statusEl.classList.remove('hidden');
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            statusEl.classList.add('hidden');
+        }, 5000);
+    }
+
+    async showScraperOnPage() {
         try {
-            this.showStatus('🚀 Starting multi-page scraping...', 'info');
-            
-            const delay = parseInt(document.getElementById('delay')?.value) || 2000;
+            this.showStatus('Activating scraper on page...', 'info');
             
             const response = await chrome.tabs.sendMessage(this.currentTab.id, {
-                action: 'scrapeAllPages',
-                delay: delay
+                action: 'showScraper'
             });
 
-            if (response?.success) {
-                this.isScrapingActive = true;
-                this.showStatus('🔄 Multi-page scraping started', 'info');
-                this.showProgress();
-                this.updateButtons();
+            if (response && response.success) {
+                this.showStatus('Scraper activated! Look for the overlay on the page.', 'success');
+                window.close();
             } else {
-                this.showStatus('❌ Error starting scraping', 'error');
+                this.showStatus('Could not activate scraper. Please refresh the page and try again.', 'error');
             }
         } catch (error) {
-            this.showStatus('❌ Connection error: ' + error.message, 'error');
+            console.error('❌ Error showing scraper:', error);
+            this.showStatus('Error: ' + error.message, 'error');
         }
     }
 
-    async stopScraping() {
+    async openStandaloneWindow() {
         try {
-            await chrome.tabs.sendMessage(this.currentTab.id, {
-                action: 'stopScraping'
-            });
+            this.showStatus('Opening standalone window...', 'info');
             
-            this.isScrapingActive = false;
-            this.hideProgress();
-            this.updateButtons();
-            this.showStatus('⏹️ Scraping stopped', 'info');
-        } catch (error) {
-            this.isScrapingActive = false;
-            this.hideProgress();
-            this.updateButtons();
-            this.showStatus('⏹️ Scraping stopped', 'info');
-        }
-    }
-
-    downloadData() {
-        if (!this.scrapedData.length) {
-            this.showStatus('❌ No data to download', 'error');
-            return;
-        }
-
-        const format = document.getElementById('format')?.value || 'csv';
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
-        
-        let content, mimeType, extension;
-
-        switch (format) {
-            case 'csv':
-                content = this.convertToCSV(this.scrapedData);
-                mimeType = 'text/csv';
-                extension = 'csv';
-                break;
-            case 'json':
-                content = JSON.stringify(this.scrapedData, null, 2);
-                mimeType = 'application/json';
-                extension = 'json';
-                break;
-            case 'excel':
-                content = this.convertToCSV(this.scrapedData);
-                mimeType = 'application/vnd.ms-excel';
-                extension = 'xls';
-                break;
-        }
-
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const filename = `universal-scraper-${timestamp}.${extension}`;
-
-        chrome.downloads.download({
-            url: url,
-            filename: filename,
-            saveAs: true
-        }, (downloadId) => {
-            if (chrome.runtime.lastError) {
-                this.showStatus('❌ Download error: ' + chrome.runtime.lastError.message, 'error');
-            } else {
-                this.showStatus(`📥 Downloaded: ${filename}`, 'success');
-            }
-            URL.revokeObjectURL(url);
-        });
-    }
-
-    convertToCSV(data) {
-        if (!data.length) return '';
-        
-        const headers = Object.keys(data[0]);
-        const csvContent = [
-            headers.join(','),
-            ...data.map(row => 
-                headers.map(header => {
-                    let cell = row[header] || '';
-                    if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\\n'))) {
-                        cell = `"${cell.replace(/"/g, '""')}"`;
-                    }
-                    return cell;
-                }).join(',')
-            )
-        ].join('\\n');
-        
-        return csvContent;
-    }
-
-    async copyToGoogleSheets() {
-        if (!this.scrapedData.length) {
-            this.showStatus('❌ No data to copy', 'error');
-            return;
-        }
-
-        try {
-            // Convert to tab-separated values for Google Sheets
-            const headers = Object.keys(this.scrapedData[0]);
-            const tsvContent = [
-                headers.join('\\t'),
-                ...this.scrapedData.map(row => 
-                    headers.map(header => {
-                        let cell = row[header] || '';
-                        cell = String(cell).replace(/\\t/g, ' ').replace(/\\n/g, ' ');
-                        return cell;
-                    }).join('\\t')
-                )
-            ].join('\\n');
-
-            await navigator.clipboard.writeText(tsvContent);
-            
-            this.showStatus(`✅ ${this.scrapedData.length} items copied! Open Google Sheets and press Ctrl+V to paste.`, 'success');
-
-        } catch (error) {
-            this.showStatus('❌ Copy failed: ' + error.message, 'error');
-        }
-    }
-
-    showPreview() {
-        if (!this.scrapedData.length) {
-            this.showStatus('❌ No data to preview', 'error');
-            return;
-        }
-
-        const previewContainer = document.getElementById('previewContainer');
-        const previewTable = document.getElementById('previewTable');
-        const previewInfo = document.getElementById('previewInfo');
-
-        // Show first 5 rows
-        const previewData = this.scrapedData.slice(0, 5);
-        const headers = Object.keys(previewData[0]);
-
-        let tableHTML = '<table><thead><tr>';
-        headers.forEach(header => {
-            tableHTML += `<th>${header.replace(/_/g, ' ').toUpperCase()}</th>`;
-        });
-        tableHTML += '</tr></thead><tbody>';
-
-        previewData.forEach(row => {
-            tableHTML += '<tr>';
-            headers.forEach(header => {
-                let cellValue = row[header] || '';
-                // Truncate long values for preview
-                if (typeof cellValue === 'string' && cellValue.length > 50) {
-                    cellValue = cellValue.substring(0, 47) + '...';
-                }
-                tableHTML += `<td>${cellValue}</td>`;
-            });
-            tableHTML += '</tr>';
-        });
-
-        tableHTML += '</tbody></table>';
-        previewTable.innerHTML = tableHTML;
-        
-        previewInfo.textContent = `Showing first 5 of ${this.scrapedData.length} total items`;
-        previewContainer.classList.remove('hidden');
-    }
-
-    clearData() {
-        if (confirm('Are you sure you want to clear all scraped data?')) {
-            this.scrapedData = [];
-            this.hideDataActions();
-            this.updateDataCounter();
-            chrome.storage.local.remove('scrapedData');
-            document.getElementById('previewContainer').classList.add('hidden');
-            this.showStatus('🗑️ Data cleared', 'info');
-        }
-    }
-
-    async popOutWindow() {
-        try {
             const popup = await chrome.windows.create({
-                url: chrome.runtime.getURL('standalone.html'),
+                url: chrome.runtime.getURL('src/standalone/standalone.html'),
                 type: 'popup',
                 width: 450,
                 height: 700,
                 focused: true
             });
 
-            await chrome.storage.local.set({
+            await chrome.storage.local.set({ 
                 targetTabId: this.currentTab.id,
-                scrapedData: this.scrapedData
+                scrapedData: this.scrapedData 
             });
 
             window.close();
         } catch (error) {
-            this.showStatus('❌ Error creating popup: ' + error.message, 'error');
+            console.error('❌ Error opening standalone window:', error);
+            this.showStatus('Error opening window: ' + error.message, 'error');
         }
     }
 
-    saveRecipe() {
-        if (this.selectedElements === 0) {
-            this.showStatus('❌ No elements selected to save as recipe', 'error');
+    async quickScrape() {
+        try {
+            this.showStatus('Quick scraping current page...', 'info');
+            
+            const response = await chrome.tabs.sendMessage(this.currentTab.id, {
+                action: 'scrapeCurrentPage'
+            });
+
+            if (response && response.success) {
+                this.scrapedData = response.data;
+                await chrome.storage.local.set({ scrapedData: this.scrapedData });
+                
+                this.showStatus(`Successfully scraped ${response.data.length} items!`, 'success');
+                this.updateUI();
+            } else {
+                this.showStatus('Error: ' + (response ? response.error : 'No response'), 'error');
+            }
+        } catch (error) {
+            console.error('❌ Quick scrape error:', error);
+            this.showStatus('Connection error. Please refresh the page and try again.', 'error');
+        }
+    }
+
+    openRecipeManager() {
+        // TODO: Implement recipe manager
+        this.showStatus('Recipe manager coming soon!', 'warning');
+    }
+
+    showPreview() {
+        const previewContainer = document.getElementById('previewContainer');
+        const previewTable = document.getElementById('previewTable');
+        const previewInfo = document.getElementById('previewInfo');
+
+        if (this.scrapedData.length === 0) {
+            this.showStatus('No data to preview', 'error');
             return;
         }
 
-        const recipeName = prompt('Enter a name for this scraping recipe:');
-        if (recipeName) {
-            // Recipe saving logic would go here
-            this.showStatus(`💾 Recipe "${recipeName}" saved (feature coming soon)`, 'info');
+        // Show first 5 rows
+        const previewData = this.scrapedData.slice(0, 5);
+        const headers = Object.keys(previewData[0]);
+
+        let html = '<table class="preview-table"><thead><tr>';
+        headers.forEach(header => {
+            html += `<th>${this.formatHeader(header)}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        previewData.forEach(row => {
+            html += '<tr>';
+            headers.forEach(header => {
+                let value = row[header] || '';
+                if (typeof value === 'string' && value.length > 30) {
+                    value = value.substring(0, 27) + '...';
+                }
+                html += `<td title="${this.escapeHtml(row[header] || '')}">${this.escapeHtml(value)}</td>`;
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        previewTable.innerHTML = html;
+        previewInfo.textContent = `Showing first 5 of ${this.scrapedData.length} total items`;
+        previewContainer.classList.remove('hidden');
+    }
+
+    formatHeader(header) {
+        return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async downloadData() {
+        if (this.scrapedData.length === 0) {
+            this.showStatus('No data to download', 'error');
+            return;
+        }
+
+        try {
+            const format = document.getElementById('exportFormat').value;
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            
+            let content, mimeType, filename;
+
+            switch (format) {
+                case 'csv':
+                    content = this.convertToCSV(this.scrapedData);
+                    mimeType = 'text/csv';
+                    filename = `scraped-data-${timestamp}.csv`;
+                    break;
+                
+                case 'excel':
+                    content = this.convertToCSV(this.scrapedData);
+                    mimeType = 'application/vnd.ms-excel';
+                    filename = `scraped-data-${timestamp}.xls`;
+                    break;
+                
+                case 'json':
+                    content = JSON.stringify(this.scrapedData, null, 2);
+                    mimeType = 'application/json';
+                    filename = `scraped-data-${timestamp}.json`;
+                    break;
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+
+            await chrome.downloads.download({
+                url: url,
+                filename: filename,
+                saveAs: true
+            });
+
+            this.showStatus(`Download started: ${filename}`, 'success');
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('❌ Download error:', error);
+            this.showStatus('Download failed: ' + error.message, 'error');
         }
     }
 
-    loadRecipe() {
-        // Recipe loading logic would go here
-        this.showStatus('📂 Recipe loading (feature coming soon)', 'info');
+    async copyToClipboard() {
+        if (this.scrapedData.length === 0) {
+            this.showStatus('No data to copy', 'error');
+            return;
+        }
+
+        try {
+            // Convert to tab-separated values for easy pasting into spreadsheets
+            const headers = Object.keys(this.scrapedData[0]);
+            const tsvContent = [
+                headers.join('\t'),
+                ...this.scrapedData.map(row => 
+                    headers.map(header => {
+                        let cell = row[header] || '';
+                        // Clean up for clipboard
+                        cell = String(cell).replace(/\t/g, ' ').replace(/\n/g, ' ').replace(/\r/g, '');
+                        return cell;
+                    }).join('\t')
+                )
+            ].join('\n');
+
+            await navigator.clipboard.writeText(tsvContent);
+            this.showStatus(`${this.scrapedData.length} items copied to clipboard! Paste into any spreadsheet.`, 'success');
+        } catch (error) {
+            console.error('❌ Copy error:', error);
+            this.showStatus('Copy failed: ' + error.message, 'error');
+        }
     }
 
-    handleMessage(message, sender, sendResponse) {
+    async clearData() {
+        if (confirm('Are you sure you want to clear all scraped data?')) {
+            this.scrapedData = [];
+            await chrome.storage.local.remove('scrapedData');
+            
+            this.updateUI();
+            document.getElementById('previewContainer').classList.add('hidden');
+            this.showStatus('Data cleared', 'info');
+        }
+    }
+
+    convertToCSV(data) {
+        if (data.length === 0) return '';
+
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => 
+                headers.map(header => {
+                    let cell = row[header] || '';
+                    // Escape quotes and wrap if necessary
+                    if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))) {
+                        cell = `"${cell.replace(/"/g, '""')}"`;
+                    }
+                    return cell;
+                }).join(',')
+            )
+        ].join('\n');
+
+        return csvContent;
+    }
+
+    async saveSettings() {
+        try {
+            const settings = {
+                exportFormat: document.getElementById('exportFormat').value,
+                scrapingDelay: parseInt(document.getElementById('scrapingDelay').value),
+                maxPages: parseInt(document.getElementById('maxPages').value)
+            };
+
+            await chrome.storage.sync.set(settings);
+            console.log('⚙️ Settings saved:', settings);
+        } catch (error) {
+            console.error('❌ Error saving settings:', error);
+        }
+    }
+
+    handleMessage(message) {
         switch (message.action) {
-            case 'elementSelected':
-                this.selectedElements = message.count || this.selectedElements + 1;
-                this.updateElementCounter();
-                this.updateSelectorButton();
-                break;
-
             case 'scrapingProgress':
-                this.updateProgress(
-                    message.current, 
-                    message.total, 
-                    `Page ${message.current} - ${message.companies} items found`
-                );
-                this.scrapedData = message.allData || this.scrapedData;
-                this.updateDataCounter();
+                this.showProgress(message);
                 break;
-
+                
             case 'scrapingComplete':
                 this.scrapedData = message.data;
-                this.showStatus(`🎉 Scraping complete! ${message.data.length} items from ${message.pages} pages`, 'success');
-                this.updateDataCounter();
+                chrome.storage.local.set({ scrapedData: this.scrapedData });
+                this.showStatus(`Scraping completed! ${message.data.length} items extracted.`, 'success');
+                this.updateUI();
                 this.hideProgress();
-                this.isScrapingActive = false;
-                this.updateButtons();
-                this.showDataActions();
-                this.saveData();
                 break;
-
+                
             case 'scrapingError':
-                this.showStatus(`❌ Error: ${message.error}`, 'error');
+                this.showStatus(`Scraping error: ${message.error}`, 'error');
                 this.hideProgress();
-                this.isScrapingActive = false;
-                this.updateButtons();
                 break;
         }
     }
 
-    showStatus(message, type = 'info') {
-        const statusEl = document.getElementById('status');
-        statusEl.innerHTML = message;
-        statusEl.className = `status ${type}`;
-        statusEl.classList.remove('hidden');
+    showProgress(message) {
+        const container = document.getElementById('progressContainer');
+        const bar = document.getElementById('progressBar');
+        const text = document.getElementById('progressText');
         
-        // Auto-hide info messages after 5 seconds
-        if (type === 'info') {
-            setTimeout(() => {
-                statusEl.classList.add('hidden');
-            }, 5000);
-        }
-    }
-
-    hideStatus() {
-        document.getElementById('status').classList.add('hidden');
-    }
-
-    updateDataCounter() {
-        const countEl = document.getElementById('dataCounter');
-        const textEl = document.getElementById('countText');
+        container.classList.remove('hidden');
         
-        if (this.scrapedData.length > 0) {
-            textEl.textContent = `📊 ${this.scrapedData.length} items scraped`;
-            countEl.classList.remove('hidden');
+        if (message.total && message.total !== '?') {
+            const percentage = Math.round((message.current / message.total) * 100);
+            bar.style.width = percentage + '%';
+            bar.textContent = percentage + '%';
         } else {
-            countEl.classList.add('hidden');
+            bar.style.width = '100%';
+            bar.textContent = 'Processing...';
         }
-    }
-
-    updateElementCounter() {
-        if (this.selectedElements > 0) {
-            this.showStatus(`🎯 ${this.selectedElements} elements selected`, 'info');
-            document.getElementById('saveRecipe').disabled = false;
-        }
-    }
-
-    showDataActions() {
-        document.getElementById('dataActions').classList.remove('hidden');
-    }
-
-    hideDataActions() {
-        document.getElementById('dataActions').classList.add('hidden');
-    }
-
-    showProgress() {
-        document.getElementById('progressContainer').classList.remove('hidden');
+        
+        text.textContent = `Processing page ${message.current}... (${message.companies || 0} items found)`;
     }
 
     hideProgress() {
         document.getElementById('progressContainer').classList.add('hidden');
     }
-
-    updateProgress(current, total, text) {
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        
-        const percentage = total !== '?' && total > 0 ? Math.round((current / total) * 100) : 0;
-        
-        if (progressFill) {
-            progressFill.style.width = percentage > 0 ? percentage + '%' : '100%';
-        }
-        
-        if (progressText) {
-            progressText.textContent = text || `Page ${current}`;
-        }
-    }
-
-    updateButtons() {
-        const scrapeAll = document.getElementById('scrapeAllPages');
-        const scrapeCurrent = document.getElementById('scrapeCurrentPage');
-        const stopButton = document.getElementById('stopScraping');
-        
-        if (this.isScrapingActive) {
-            scrapeAll.style.display = 'none';
-            scrapeCurrent.style.display = 'none';
-        } else {
-            scrapeAll.style.display = 'block';
-            scrapeCurrent.style.display = 'block';
-        }
-    }
-
-    disableButtons(disabled) {
-        const buttons = ['scrapeCurrentPage', 'scrapeAllPages', 'toggleSelector'];
-        buttons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) btn.disabled = disabled;
-        });
-    }
-
-    async saveData() {
-        await chrome.storage.local.set({ 
-            scrapedData: this.scrapedData,
-            timestamp: Date.now()
-        });
-    }
-
-    async loadStoredData() {
-        const stored = await chrome.storage.local.get(['scrapedData']);
-        if (stored.scrapedData?.length) {
-            this.scrapedData = stored.scrapedData;
-            this.showDataActions();
-            this.updateDataCounter();
-        }
-    }
-
-    saveSettings() {
-        const delay = document.getElementById('delay')?.value;
-        const format = document.getElementById('format')?.value;
-        
-        chrome.storage.sync.set({
-            scrapingDelay: parseInt(delay),
-            exportFormat: format
-        });
-    }
-
-    loadSettings() {
-        chrome.storage.sync.get(['scrapingDelay', 'exportFormat'], (result) => {
-            if (result.scrapingDelay) {
-                const delayEl = document.getElementById('delay');
-                if (delayEl) delayEl.value = result.scrapingDelay;
-            }
-            if (result.exportFormat) {
-                const formatEl = document.getElementById('format');
-                if (formatEl) formatEl.value = result.exportFormat;
-            }
-        });
-    }
 }
 
 // Initialize popup when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new UniversalScrapingPopup();
+    new UniversalScraperPopup();
 });
 
-console.log('✅ Universal Scraping Popup Script Loaded');
+console.log('✅ Universal Scraper Popup Script Loaded');
